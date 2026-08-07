@@ -9,6 +9,8 @@ import { publishDraftToAllPlatforms } from '../publishers/simulationPublisher.ts
 import { evaluateAdaptiveScheduler } from './adaptiveScheduler.ts';
 import { ContentCategory, StoryCluster } from '../types.js';
 import { runEngagementCycle } from './engagementDaemon.ts';
+import { BskyAgent } from '@atproto/api';
+import axios from 'axios';
 
 let isCycleRunning = false;
 
@@ -17,6 +19,65 @@ let isCycleRunning = false;
  */
 function normalizeHash(title: string): string {
   return title.toLowerCase().replace(/[^a-z0-9 ]/g, '').trim().substring(0, 60);
+}
+
+/**
+ * Live account timeline verification:
+ * Checks recent posts directly on Bluesky & Farcaster profiles before publishing to ensure
+ * no story is ever duplicated across server restarts, redeploys, or concurrent instances.
+ */
+async function isAlreadyPublishedOnLiveSocials(storyTitle: string): Promise<boolean> {
+  const cleanKey = storyTitle.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 30);
+  if (cleanKey.length < 5) return false;
+
+  // 1. Check Bluesky recent posts on profile
+  const bskyHandle = process.env.BLUESKY_HANDLE;
+  const bskyPassword = process.env.BLUESKY_APP_PASSWORD;
+  if (bskyHandle && bskyPassword) {
+    try {
+      const agent = new BskyAgent({ service: process.env.BLUESKY_SERVICE_URL || 'https://bsky.social' });
+      await agent.login({ identifier: bskyHandle, password: bskyPassword });
+      const feedRes = await agent.getAuthorFeed({ actor: bskyHandle, limit: 15 });
+      const posts = feedRes.data.feed || [];
+      for (const item of posts) {
+        const text = (item.post.record as any)?.text || '';
+        const cleanPostText = text.toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (cleanPostText.includes(cleanKey)) {
+          db.addLog('INFO', 'LIVE_DEDUP', `Story "${storyTitle.substring(0, 40)}..." detected on live Bluesky profile; skipping duplicate.`);
+          return true;
+        }
+      }
+    } catch (_) { /* non-critical API check fallback */ }
+  }
+
+  // 2. Check Farcaster recent casts on profile
+  const neynarKey = process.env.FARCASTER_NEYNAR_API_KEY;
+  if (neynarKey) {
+    try {
+      const userRes = await axios.get('https://api.neynar.com/v2/farcaster/user/by_username?username=signalatlas', {
+        headers: { api_key: neynarKey },
+        timeout: 5000
+      });
+      const fid = userRes.data?.user?.fid;
+      if (fid) {
+        const castsRes = await axios.get(`https://api.neynar.com/v2/farcaster/feed/user/casts?fid=${fid}&limit=15`, {
+          headers: { api_key: neynarKey },
+          timeout: 5000
+        });
+        const casts = castsRes.data?.casts || [];
+        for (const cast of casts) {
+          const text = cast.text || '';
+          const cleanCastText = text.toLowerCase().replace(/[^a-z0-9]/g, '');
+          if (cleanCastText.includes(cleanKey)) {
+            db.addLog('INFO', 'LIVE_DEDUP', `Story "${storyTitle.substring(0, 40)}..." detected on live Farcaster profile; skipping duplicate.`);
+            return true;
+          }
+        }
+      }
+    } catch (_) { /* non-critical API check fallback */ }
+  }
+
+  return false;
 }
 
 export async function runAutonomousPublishingCycle(force = false): Promise<{ status: string; storyProcessed?: string; blockedReason?: string }> {
@@ -63,15 +124,20 @@ export async function runAutonomousPublishingCycle(force = false): Promise<{ sta
     }
 
     // Pick best story matching category or top overall story
-    // DEDUP: skip stories already published (check hash)
+    // DEDUP: skip stories already published in DB or live on social feeds
     let selectedStory: StoryCluster | undefined = undefined;
     
     // First try category-matched stories
     for (const s of storyClusters) {
       const hash = normalizeHash(s.title);
       if (s.category === targetCategory && !db.hasPublishedHash(hash)) {
-        selectedStory = s;
-        break;
+        const alreadyLive = await isAlreadyPublishedOnLiveSocials(s.title);
+        if (!alreadyLive) {
+          selectedStory = s;
+          break;
+        } else {
+          db.addPublishedHash(hash); // Cache locally so we don't query API repeatedly
+        }
       }
     }
     
@@ -80,14 +146,19 @@ export async function runAutonomousPublishingCycle(force = false): Promise<{ sta
       for (const s of storyClusters) {
         const hash = normalizeHash(s.title);
         if (!db.hasPublishedHash(hash)) {
-          selectedStory = s;
-          break;
+          const alreadyLive = await isAlreadyPublishedOnLiveSocials(s.title);
+          if (!alreadyLive) {
+            selectedStory = s;
+            break;
+          } else {
+            db.addPublishedHash(hash);
+          }
         }
       }
     }
 
     if (!selectedStory) {
-      db.addLog('INFO', 'SCHEDULER', 'All available stories have already been published. Waiting for fresh news.');
+      db.addLog('INFO', 'SCHEDULER', 'All available stories have already been published on live accounts. Awaiting fresh news.');
       isCycleRunning = false;
       return { status: 'ALL_STORIES_ALREADY_PUBLISHED' };
     }
