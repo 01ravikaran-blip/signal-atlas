@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  signal-atlas:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: signal-atlas-247
+    restart: always
+    ports:
+      - "5050:5050"
+    env_file:
+      - .env
+    volumes:
+      - ./server/data:/app/server/data

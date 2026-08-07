@@ -1,0 +1,216 @@
+:root {
+  --bg-dark: #07090E;
+  --bg-card: rgba(15, 23, 42, 0.75);
+  --bg-card-hover: rgba(30, 41, 59, 0.85);
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-color-glow: rgba(0, 242, 254, 0.25);
+  
+  --primary-cyan: #00F2FE;
+  --primary-purple: #7928CA;
+  --accent-pink: #FF0080;
+  --status-green: #10B981;
+  --status-amber: #F59E0B;
+  --status-red: #EF4444;
+
+  --text-main: #F8FAFC;
+  --text-muted: #94A3B8;
+  --text-dim: #64748B;
+
+  --font-sans: 'Inter', sans-serif;
+  --font-display: 'Outfit', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-dark);
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(121, 40, 202, 0.12) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(0, 242, 254, 0.10) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(16, 185, 129, 0.08) 0px, transparent 50%);
+  background-attachment: fixed;
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  overflow-x: hidden;
+  line-height: 1.5;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-cyan);
+}
+
+/* Glassmorphism Card Utility */
+.glass-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  transition: all 0.2s ease-in-out;
+}
+
+.glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.glass-card-glow {
+  border-color: var(--border-color-glow);
+  box-shadow: 0 0 20px rgba(0, 242, 254, 0.15);
+}
+
+/* Typography */
+h1, h2, h3, .font-display {
+  font-family: var(--font-display);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Live Pulse Indicator */
+.pulse-green {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--status-green);
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  animation: pulse-green-anim 2s infinite;
+}
+
+@keyframes pulse-green-anim {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+.pulse-red {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--status-red);
+  box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  animation: pulse-red-anim 1.5s infinite;
+}
+
+@keyframes pulse-red-anim {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+
+/* Badge Styles */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-crypto {
+  background: rgba(121, 40, 202, 0.2);
+  color: #C084FC;
+  border: 1px solid rgba(121, 40, 202, 0.4);
+}
+
+.badge-ai {
+  background: rgba(0, 242, 254, 0.15);
+  color: #38BDF8;
+  border: 1px solid rgba(0, 242, 254, 0.3);
+}
+
+.badge-macro {
+  background: rgba(245, 158, 11, 0.15);
+  color: #FBBF24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.badge-danger {
+  background: rgba(239, 68, 68, 0.2);
+  color: #F87171;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.badge-success {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34D399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+/* Emergency Toggle Switch */
+.emergency-switch-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 8px 16px;
+  border-radius: 30px;
+  border: 1px solid var(--border-color);
+}
+
+.switch-btn {
+  position: relative;
+  width: 54px;
+  height: 28px;
+  border-radius: 20px;
+  background: #10B981;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.switch-btn.paused {
+  background: #EF4444;
+}
+
+.switch-circle {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #FFF;
+  transition: transform 0.3s ease;
+}
+
+.switch-btn.paused .switch-circle {
+  transform: translateX(26px);
+}

@@ -1,0 +1,14 @@
+{
+  "name": "signal-atlas-root",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Signal Atlas - Autonomous Global Crypto, DeFi, AI, Web3, Stock-Market, and Macro News Publishing System",
+  "scripts": {
+    "install:all": "npm install && cd server && npm install && cd ../client && npm install",
+    "start": "node scripts/start.js",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev",
+    "test": "cd server && npm run test"
+  }
+}

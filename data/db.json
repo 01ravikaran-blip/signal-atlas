@@ -1,0 +1,23 @@
+{
+  "settings": {
+    "emergencyPause": false,
+    "demoMode": true,
+    "publishIntervalMinutes": 5,
+    "minConfidenceThreshold": 0.7
+  },
+  "stories": [],
+  "drafts": [],
+  "publications": [],
+  "blockedPosts": [],
+  "marketSnapshots": [],
+  "logs": [
+    {
+      "id": "log_1786116064000_b0t7",
+      "timestamp": "2026-08-07T15:21:04.000Z",
+      "level": "INFO",
+      "module": "LLM_PROVIDER",
+      "message": "Using built-in Signal Atlas offline NLP engine."
+    }
+  ],
+  "publishedHashes": []
+}
