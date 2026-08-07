@@ -9,6 +9,7 @@ import { publishDraftToAllPlatforms } from '../publishers/simulationPublisher.ts
 import { evaluateAdaptiveScheduler } from './adaptiveScheduler.ts';
 import { ContentCategory, StoryCluster } from '../types.js';
 import { runEngagementCycle } from './engagementDaemon.ts';
+import { evaluateVisualDecision } from '../media/mediaDecisionEngine.ts';
 import { BskyAgent } from '@atproto/api';
 import axios from 'axios';
 
@@ -198,12 +199,15 @@ export async function runAutonomousPublishingCycle(force = false): Promise<{ sta
       };
     }
 
-    // 8. Record hash BEFORE publishing to prevent race conditions
+    // 8. Media & Visual Attachment Engine
+    const visualDecision = await evaluateVisualDecision(selectedStory, draft);
+
+    // 9. Record hash BEFORE publishing to prevent race conditions
     const storyHash = normalizeHash(selectedStory.title);
     db.addPublishedHash(storyHash);
 
-    // 9. Publish to Bluesky, Farcaster, Telegram, Discord
-    const pubResults = await publishDraftToAllPlatforms(draft);
+    // 10. Publish to Bluesky, Farcaster, Telegram, Discord
+    const pubResults = await publishDraftToAllPlatforms(draft, visualDecision);
 
     db.addLog('SUCCESS', 'SCHEDULER', `Successfully published story across all 4 target platforms! Total: ${pubResults.length}`);
 

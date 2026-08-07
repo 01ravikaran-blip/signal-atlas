@@ -1,8 +1,8 @@
 import axios from 'axios';
-import { PostDraft, PublicationResult } from '../types.js';
+import { PostDraft, PublicationResult, VisualDecision } from '../types.js';
 import { db } from '../db/database.ts';
 
-export async function publishToFarcaster(draft: PostDraft): Promise<PublicationResult> {
+export async function publishToFarcaster(draft: PostDraft, visualDecision?: VisualDecision): Promise<PublicationResult> {
   const warpcastSecret = process.env.FARCASTER_WARPCAST_SECRET || process.env.FARCASTER_NEYNAR_API_KEY;
   const signerUuid = process.env.FARCASTER_SIGNER_UUID;
 

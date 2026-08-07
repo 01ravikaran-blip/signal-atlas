@@ -293,3 +293,114 @@ export type PermissionStatus = Record<PlatformTarget, {
   reason?: string;
 }>;
 
+// ==========================================
+// MEDIA & VISUAL CONTENT PIPELINE TYPES
+// ==========================================
+
+export type RightsClassification =
+  | 'OWNED_ORIGINAL'
+  | 'GENERATED_FROM_OWNED_DATA'
+  | 'PUBLIC_DOMAIN_OR_CONFIRMED_PERMITTED'
+  | 'OFFICIAL_MEDIA_WITH_REUSE_PERMISSION'
+  | 'SOURCE_PREVIEW_ONLY'
+  | 'UNKNOWN_RIGHTS'
+  | 'BLOCKED';
+
+export type VisualDecisionType =
+  | 'ATTACH_ORIGINAL_CHART'
+  | 'ATTACH_NEWS_CARD'
+  | 'ATTACH_TIMELINE'
+  | 'ATTACH_BRIEFING_CAROUSEL'
+  | 'ATTACH_RISK_MAP'
+  | 'ATTACH_CORRECTION_CARD'
+  | 'USE_LINK_CARD_ONLY'
+  | 'TEXT_ONLY'
+  | 'BLOCK_VISUAL';
+
+export type ContentSeriesType =
+  | 'MORNING_BRIEF'
+  | 'DEFI_RISK_RADAR'
+  | 'MACRO_TRANSMISSION'
+  | 'AI_WEB3_RADAR'
+  | 'GLOBAL_MARKET_MAP'
+  | 'WEEKLY_CROSS_ASSET'
+  | 'DEVELOPING_TIMELINE'
+  | 'CORRECTION_CARD';
+
+export interface MediaScores {
+  visualValueScore: number;           // 0-10
+  factualVisualRisk: number;          // 0-10 (lower is better)
+  copyrightRisk: number;              // 0-10 (lower is better)
+  misleadingContextRisk: number;      // 0-10 (lower is better)
+  accessibilityScore: number;         // 0-10
+  platformFitScore: number;           // 0-10
+  expectedInformationGain: number;   // 0-10
+}
+
+export interface MediaAsset {
+  id: string;
+  contentItemId?: string;
+  assetType: VisualDecisionType;
+  seriesType?: ContentSeriesType;
+  sourceUrl?: string;
+  rightsClassification: RightsClassification;
+  attributionText: string;
+  mimeType: string;
+  width: number;
+  height: number;
+  fileSize: number;
+  sha256: string;
+  altText: string;
+  generatedBy: 'SIGNAL_ATLAS_CHART_ENGINE' | 'AI_ILLUSTRATION' | 'SOURCE_PERMITTED';
+  isAiGenerated: boolean;
+  processingStatus: 'PROCESSED' | 'FAILED' | 'BLOCKED';
+  rejectionReason?: string;
+  localPath?: string;
+  dataUrl?: string;
+  scores: MediaScores;
+  createdAt: string;
+}
+
+export interface MediaDerivative {
+  id: string;
+  mediaAssetId: string;
+  platform: PlatformTarget;
+  fileUrlOrBlobReference: string;
+  width: number;
+  height: number;
+  fileSize: number;
+  createdAt: string;
+}
+
+export interface VisualDecision {
+  decision: VisualDecisionType;
+  seriesType?: ContentSeriesType;
+  reason: string;
+  scores: MediaScores;
+  rightsClassification: RightsClassification;
+  altText: string;
+  attributionText: string;
+  mediaAsset?: MediaAsset;
+}
+
+export interface MediaAnalyticsRecord {
+  id: string;
+  mediaAssetId?: string;
+  draftId: string;
+  hasVisual: boolean;
+  visualType: VisualDecisionType;
+  seriesType?: ContentSeriesType;
+  platform: PlatformTarget;
+  impressions: number;
+  likes: number;
+  reposts: number;
+  replies: number;
+  saves: number;
+  shares: number;
+  profileVisits: number;
+  follows: number;
+  linkClicks: number;
+  timestamp: string;
+}
+
+

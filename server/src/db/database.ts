@@ -12,7 +12,10 @@ import {
   OwnPostComment,
   ProtectionSettings,
   ImportantNewsModeState,
-  PlatformTarget
+  PlatformTarget,
+  MediaAsset,
+  MediaDerivative,
+  MediaAnalyticsRecord
 } from '../types.js';
 
 interface DatabaseSchema {
@@ -39,6 +42,9 @@ interface DatabaseSchema {
   marketSnapshots: MarketSnapshot[];
   logs: SystemLog[];
   publishedHashes: string[];
+  mediaAssets: MediaAsset[];
+  mediaDerivatives: MediaDerivative[];
+  mediaAnalytics: MediaAnalyticsRecord[];
 }
 
 const DATA_DIR = path.resolve(process.cwd(), 'data');
@@ -87,7 +93,10 @@ class Database {
       ownPostComments: [],
       marketSnapshots: [],
       logs: [],
-      publishedHashes: []
+      publishedHashes: [],
+      mediaAssets: [],
+      mediaDerivatives: [],
+      mediaAnalytics: []
     };
     this.init();
   }
@@ -318,6 +327,42 @@ class Database {
       }
     }
     return counts;
+  }
+
+  // Media Assets
+  public addMediaAsset(asset: MediaAsset) {
+    if (!this.data.mediaAssets) this.data.mediaAssets = [];
+    this.data.mediaAssets.unshift(asset);
+    if (this.data.mediaAssets.length > 200) this.data.mediaAssets.pop();
+    this.save();
+  }
+
+  public getMediaAssets(limit = 50): MediaAsset[] {
+    return (this.data.mediaAssets || []).slice(0, limit);
+  }
+
+  // Media Derivatives
+  public addMediaDerivative(derivative: MediaDerivative) {
+    if (!this.data.mediaDerivatives) this.data.mediaDerivatives = [];
+    this.data.mediaDerivatives.unshift(derivative);
+    if (this.data.mediaDerivatives.length > 300) this.data.mediaDerivatives.pop();
+    this.save();
+  }
+
+  public getMediaDerivatives(limit = 50): MediaDerivative[] {
+    return (this.data.mediaDerivatives || []).slice(0, limit);
+  }
+
+  // Media Analytics
+  public addMediaAnalytics(analytics: MediaAnalyticsRecord) {
+    if (!this.data.mediaAnalytics) this.data.mediaAnalytics = [];
+    this.data.mediaAnalytics.unshift(analytics);
+    if (this.data.mediaAnalytics.length > 500) this.data.mediaAnalytics.pop();
+    this.save();
+  }
+
+  public getMediaAnalytics(limit = 100): MediaAnalyticsRecord[] {
+    return (this.data.mediaAnalytics || []).slice(0, limit);
   }
 }
 

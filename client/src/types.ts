@@ -98,6 +98,11 @@ export interface PublicationResult {
 
 export interface SystemStatus {
   emergencyPause: boolean;
+  publishingPause?: boolean;
+  engagementPause?: boolean;
+  autonomousReplies?: boolean;
+  autonomousLikes?: boolean;
+  autonomousReposts?: boolean;
   demoMode: boolean;
   aiProvider: string;
   publishIntervalMinutes: number;
@@ -106,5 +111,63 @@ export interface SystemStatus {
   totalBlocked: number;
   totalStories: number;
   lastRunTimestamp: string | null;
-  platformStatus: Record<PlatformTarget, { configured: boolean; mode: string }>;
+  importantNewsMode?: {
+    active: boolean;
+    eventTitle?: string;
+    overrideReason?: string;
+    updateCount: number;
+  };
+}
+
+export interface MediaScores {
+  visualValueScore: number;
+  factualVisualRisk: number;
+  copyrightRisk: number;
+  misleadingContextRisk: number;
+  accessibilityScore: number;
+  platformFitScore: number;
+  expectedInformationGain: number;
+}
+
+export interface MediaAsset {
+  id: string;
+  contentItemId?: string;
+  assetType: string;
+  seriesType?: string;
+  sourceUrl?: string;
+  rightsClassification: string;
+  attributionText: string;
+  mimeType: string;
+  width: number;
+  height: number;
+  fileSize: number;
+  sha256: string;
+  altText: string;
+  generatedBy: string;
+  isAiGenerated: boolean;
+  processingStatus: string;
+  rejectionReason?: string;
+  dataUrl?: string;
+  scores: MediaScores;
+  createdAt: string;
+}
+
+export interface MediaAnalyticsRecord {
+  id: string;
+  mediaAssetId?: string;
+  draftId: string;
+  hasVisual: boolean;
+  visualType: string;
+  seriesType?: string;
+  platform: PlatformTarget;
+  impressions: number;
+  likes: number;
+  reposts: number;
+  replies: number;
+  saves: number;
+  shares: number;
+  profileVisits: number;
+  follows: number;
+  linkClicks: number;
+  timestamp: string;
 }

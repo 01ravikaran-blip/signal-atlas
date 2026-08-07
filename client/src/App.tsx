@@ -5,7 +5,8 @@ import { LiveFeed } from './components/LiveFeed';
 import { StoryRadar } from './components/StoryRadar';
 import { BlockedVault } from './components/BlockedVault';
 import { PlatformMatrix } from './components/PlatformMatrix';
-import { SystemStatus, PublicationResult, BlockedPost, MarketSnapshot, StoryCluster } from './types';
+import { MediaCenter } from './components/MediaCenter';
+import { SystemStatus, PublicationResult, BlockedPost, MarketSnapshot, StoryCluster, MediaAsset, MediaAnalyticsRecord } from './types';
 
 export default function App() {
   const [status, setStatus] = useState<SystemStatus | null>(null);
@@ -13,17 +14,21 @@ export default function App() {
   const [blockedPosts, setBlockedPosts] = useState<BlockedPost[]>([]);
   const [market, setMarket] = useState<MarketSnapshot | null>(null);
   const [stories, setStories] = useState<StoryCluster[]>([]);
-  const [activeTab, setActiveTab] = useState<'FEED' | 'RADAR' | 'BLOCKED'>('FEED');
+  const [mediaAssets, setMediaAssets] = useState<MediaAsset[]>([]);
+  const [mediaAnalytics, setMediaAnalytics] = useState<MediaAnalyticsRecord[]>([]);
+  const [activeTab, setActiveTab] = useState<'FEED' | 'RADAR' | 'MEDIA' | 'BLOCKED'>('FEED');
   const [isTriggering, setIsTriggering] = useState<boolean>(false);
 
   const fetchData = async () => {
     try {
-      const [resStatus, resPosts, resBlocked, resMarket, resStories] = await Promise.all([
+      const [resStatus, resPosts, resBlocked, resMarket, resStories, resMedia, resAnalytics] = await Promise.all([
         fetch('/api/status').then(r => r.json()),
         fetch('/api/posts').then(r => r.json()),
         fetch('/api/blocked').then(r => r.json()),
         fetch('/api/market').then(r => r.json()),
-        fetch('/api/stories').then(r => r.json())
+        fetch('/api/stories').then(r => r.json()),
+        fetch('/api/media').then(r => r.json()).catch(() => []),
+        fetch('/api/media/analytics').then(r => r.json()).catch(() => [])
       ]);
 
       setStatus(resStatus);
@@ -31,6 +36,8 @@ export default function App() {
       if (Array.isArray(resBlocked)) setBlockedPosts(resBlocked);
       if (resMarket && resMarket.crypto) setMarket(resMarket);
       if (Array.isArray(resStories)) setStories(resStories);
+      if (Array.isArray(resMedia)) setMediaAssets(resMedia);
+      if (Array.isArray(resAnalytics)) setMediaAnalytics(resAnalytics);
     } catch (err) {
       console.error('Failed to fetch dashboard data', err);
     }
@@ -128,6 +135,23 @@ export default function App() {
         </button>
 
         <button
+          onClick={() => setActiveTab('MEDIA')}
+          style={{
+            padding: '10px 20px',
+            borderRadius: '8px',
+            border: 'none',
+            background: activeTab === 'MEDIA' ? 'rgba(16, 185, 129, 0.15)' : 'transparent',
+            color: activeTab === 'MEDIA' ? '#10B981' : 'var(--text-muted)',
+            fontWeight: 700,
+            fontSize: '0.9rem',
+            cursor: 'pointer',
+            borderBottom: activeTab === 'MEDIA' ? '2px solid #10B981' : 'none'
+          }}
+        >
+          🖼️ Media Center ({mediaAssets.length})
+        </button>
+
+        <button
           onClick={() => setActiveTab('BLOCKED')}
           style={{
             padding: '10px 20px',
@@ -148,6 +172,7 @@ export default function App() {
       {/* Tab Content Views */}
       {activeTab === 'FEED' && <LiveFeed publications={publications} />}
       {activeTab === 'RADAR' && <StoryRadar market={market} stories={stories} />}
+      {activeTab === 'MEDIA' && <MediaCenter mediaAssets={mediaAssets} mediaAnalytics={mediaAnalytics} />}
       {activeTab === 'BLOCKED' && <BlockedVault blockedPosts={blockedPosts} />}
 
     </div>

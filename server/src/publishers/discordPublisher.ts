@@ -1,9 +1,9 @@
 import axios from 'axios';
-import { PostDraft, PublicationResult } from '../types.js';
+import { PostDraft, PublicationResult, VisualDecision } from '../types.js';
 import { db } from '../db/database.ts';
 import { SOCIAL_HANDLES } from '../config/constants.ts';
 
-export async function publishToDiscord(draft: PostDraft): Promise<PublicationResult> {
+export async function publishToDiscord(draft: PostDraft, visualDecision?: VisualDecision): Promise<PublicationResult> {
   const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
   const botToken = process.env.DISCORD_TOKEN;
   const channelId = process.env.DISCORD_CHANNEL_ID;
@@ -24,13 +24,17 @@ export async function publishToDiscord(draft: PostDraft): Promise<PublicationRes
   const embedColor = draft.category === 'CRYPTO_DEFI' ? 0x7928CA : draft.category === 'AI_WEB3' ? 0x00F2FE : 0xF59E0B;
   const content = draft.platformPayloads.DISCORD;
 
-  const embedPayload = {
+  const embedPayload: any = {
     title: `📊 Signal Atlas Market Insight: ${draft.rawTopic.substring(0, 100)}`,
     description: content,
     color: embedColor,
     footer: { text: `Signal Atlas | Bsky: ${SOCIAL_HANDLES.BLUESKY} | FC: ${SOCIAL_HANDLES.FARCASTER}` },
     timestamp: new Date().toISOString()
   };
+
+  if (visualDecision && visualDecision.mediaAsset && visualDecision.mediaAsset.dataUrl) {
+    embedPayload.image = { url: visualDecision.mediaAsset.dataUrl };
+  }
 
 
   // 1. Post via Discord Bot API if TOKEN and CHANNEL_ID are set

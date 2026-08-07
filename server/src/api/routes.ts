@@ -189,6 +189,18 @@ router.post('/trigger', async (req: Request, res: Response) => {
   res.json(result);
 });
 
+// Media Assets Library
+router.get('/media', (req: Request, res: Response) => {
+  const limit = parseInt(req.query.limit as string || '50', 10);
+  res.json(db.getMediaAssets(limit));
+});
+
+// Media Analytics & Performance Reports
+router.get('/media/analytics', (req: Request, res: Response) => {
+  const limit = parseInt(req.query.limit as string || '100', 10);
+  res.json(db.getMediaAnalytics(limit));
+});
+
 // Settings Update
 router.post('/settings', (req: Request, res: Response) => {
   const { minConfidenceThreshold, publishIntervalMinutes } = req.body;
