@@ -3,16 +3,21 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy package descriptors
+# Copy package descriptors first for better Docker layer caching
 COPY package*.json ./
 COPY server/package*.json ./server/
 COPY client/package*.json ./client/
 
-# Install ALL dependencies (including tsx for runtime)
-RUN npm install && cd server && npm install && cd ../client && npm install
+# Install ALL dependencies (including dev deps for build tools)
+RUN npm install --ignore-scripts && \
+    cd server && npm install --ignore-scripts && \
+    cd ../client && npm install --ignore-scripts
 
 # Copy full source
 COPY . .
+
+# Build the client frontend (Vite + React)
+RUN cd client && npx vite build
 
 ENV NODE_ENV=production
 ENV PORT=5050
