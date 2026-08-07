@@ -8,8 +8,16 @@ import { evaluateSafetyPolicy } from '../safety/safetyEngine.ts';
 import { publishDraftToAllPlatforms } from '../publishers/simulationPublisher.ts';
 import { evaluateAdaptiveScheduler } from './adaptiveScheduler.ts';
 import { ContentCategory, StoryCluster } from '../types.js';
+import { runEngagementCycle } from './engagementDaemon.ts';
 
 let isCycleRunning = false;
+
+/**
+ * Normalize a story title into a dedup key — lowercase, strip non-alpha, take first 60 chars
+ */
+function normalizeHash(title: string): string {
+  return title.toLowerCase().replace(/[^a-z0-9 ]/g, '').trim().substring(0, 60);
+}
 
 export async function runAutonomousPublishingCycle(force = false): Promise<{ status: string; storyProcessed?: string; blockedReason?: string }> {
   if (isCycleRunning && !force) {
@@ -55,8 +63,34 @@ export async function runAutonomousPublishingCycle(force = false): Promise<{ sta
     }
 
     // Pick best story matching category or top overall story
-    let selectedStory: StoryCluster | undefined = storyClusters.find(s => s.category === targetCategory);
-    if (!selectedStory) selectedStory = storyClusters[0];
+    // DEDUP: skip stories already published (check hash)
+    let selectedStory: StoryCluster | undefined = undefined;
+    
+    // First try category-matched stories
+    for (const s of storyClusters) {
+      const hash = normalizeHash(s.title);
+      if (s.category === targetCategory && !db.hasPublishedHash(hash)) {
+        selectedStory = s;
+        break;
+      }
+    }
+    
+    // Fallback: any un-published story
+    if (!selectedStory) {
+      for (const s of storyClusters) {
+        const hash = normalizeHash(s.title);
+        if (!db.hasPublishedHash(hash)) {
+          selectedStory = s;
+          break;
+        }
+      }
+    }
+
+    if (!selectedStory) {
+      db.addLog('INFO', 'SCHEDULER', 'All available stories have already been published. Waiting for fresh news.');
+      isCycleRunning = false;
+      return { status: 'ALL_STORIES_ALREADY_PUBLISHED' };
+    }
 
     // 4. Adaptive Scheduler Decision (Rolling 24h limit, fatigue cooldown, breaking news override)
     const scheduleDecision = evaluateAdaptiveScheduler(selectedStory);
@@ -93,7 +127,11 @@ export async function runAutonomousPublishingCycle(force = false): Promise<{ sta
       };
     }
 
-    // 8. Publish to Bluesky, Farcaster, Telegram, Discord
+    // 8. Record hash BEFORE publishing to prevent race conditions
+    const storyHash = normalizeHash(selectedStory.title);
+    db.addPublishedHash(storyHash);
+
+    // 9. Publish to Bluesky, Farcaster, Telegram, Discord
     const pubResults = await publishDraftToAllPlatforms(draft);
 
     db.addLog('SUCCESS', 'SCHEDULER', `Successfully published story across all 4 target platforms! Total: ${pubResults.length}`);
@@ -116,13 +154,29 @@ export function startAutonomousDaemon() {
   
   db.addLog('INFO', 'DAEMON', `Autonomous scheduler daemon initialized. Interval: ${intervalMinutes} minute(s).`);
 
-  // Run initial cycle immediately
+  // Run initial publishing cycle after 3 seconds
   setTimeout(() => {
     runAutonomousPublishingCycle().catch(err => console.error('Initial cycle error:', err));
   }, 3000);
 
-  // Set recurring timer
+  // Set recurring publishing timer
   setInterval(() => {
     runAutonomousPublishingCycle().catch(err => console.error('Daemon cycle error:', err));
   }, ms);
+
+  // --- ENGAGEMENT DAEMON ---
+  // Run engagement cycle (fetch notifications, reply, like, repost) every 3 minutes
+  const engagementIntervalMs = 3 * 60 * 1000;
+  
+  db.addLog('INFO', 'DAEMON', 'Engagement daemon initialized. Interval: 3 minute(s).');
+
+  // First engagement cycle after 30 seconds (let publishing go first)
+  setTimeout(() => {
+    runEngagementCycle().catch(err => console.error('Initial engagement cycle error:', err));
+  }, 30000);
+
+  // Recurring engagement timer
+  setInterval(() => {
+    runEngagementCycle().catch(err => console.error('Engagement cycle error:', err));
+  }, engagementIntervalMs);
 }

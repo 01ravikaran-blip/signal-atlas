@@ -24,7 +24,6 @@ export async function publishDraftToAllPlatforms(draft: PostDraft): Promise<Publ
     }
 
     db.addPublication(res);
-    db.addPublishedHash(draft.rawTopic);
     results.push(res);
   }
 

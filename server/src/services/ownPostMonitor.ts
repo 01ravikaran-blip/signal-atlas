@@ -23,24 +23,34 @@ export function classifyComment(commentText: string): CommentCategory {
   }
 
   // 2. Financial Advice Requests
-  if (lower.includes('should i buy') || lower.includes('should i sell') || lower.includes('what price will') || lower.includes('portfolio advice') || lower.includes('when moon')) {
+  if (lower.includes('should i buy') || lower.includes('should i sell') || lower.includes('what price will') || lower.includes('portfolio advice') || lower.includes('when moon') || lower.includes('price target') || lower.includes('entry point') || lower.includes('is it too late')) {
     return 'FINANCIAL_ADVICE_REQUEST';
   }
 
   // 3. Factual Error / Constructive Disagreement
-  if (lower.includes('incorrect') || lower.includes('wrong data') || lower.includes('typo') || lower.includes('actually happened on') || lower.includes('error in fact')) {
+  if (lower.includes('incorrect') || lower.includes('wrong data') || lower.includes('typo') || lower.includes('actually happened on') || lower.includes('error in fact') || lower.includes('not accurate') || lower.includes('disagree') || lower.includes('misleading')) {
     return 'CONSTRUCTIVE_DISAGREEMENT';
   }
 
-  // 4. Questions & Clarification
-  if (lower.includes('why') || lower.includes('how') || lower.includes('what does this mean') || lower.includes('can you explain')) {
+  // 4. Questions & Clarification — cast a WIDE net
+  if (lower.includes('?') || lower.includes('why') || lower.includes('how') || lower.includes('what does') || lower.includes('can you explain') || lower.includes('where') || lower.includes('when') || lower.includes('which') || lower.includes('thoughts on') || lower.includes('your take') || lower.includes('opinion') || lower.includes('invalidation') || lower.includes('risk') || lower.includes('level') || lower.includes('target') || lower.includes('outlook') || lower.includes('timeframe')) {
     return 'GENUINE_QUESTION';
   }
-  if (lower.includes('source?') || lower.includes('where is the data') || lower.includes('citation')) {
+  if (lower.includes('source') || lower.includes('data') || lower.includes('citation') || lower.includes('proof') || lower.includes('evidence') || lower.includes('link')) {
     return 'REQUEST_CLARIFICATION';
   }
-  if (lower.includes('according to') || lower.includes('sec filed') || lower.includes('onchain data shows')) {
+  if (lower.includes('according to') || lower.includes('sec filed') || lower.includes('onchain') || lower.includes('chart shows') || lower.includes('volume') || lower.includes('liquidity') || lower.includes('tvl') || lower.includes('mcap')) {
     return 'RELEVANT_INFO';
+  }
+
+  // 5. Positive engagement / appreciation — reply to build community
+  if (lower.includes('great') || lower.includes('nice') || lower.includes('good') || lower.includes('solid') || lower.includes('thanks') || lower.includes('helpful') || lower.includes('agree') || lower.includes('bullish') || lower.includes('bearish') || lower.includes('interesting') || lower.includes('insightful') || lower.includes('love this') || lower.includes('fire') || lower.includes('based') || lower.includes('well done') || lower.includes('keep it up')) {
+    return 'GENUINE_QUESTION'; // Treat positive engagement as worthy of reply
+  }
+
+  // 6. If comment has substance (>15 chars), treat as genuine engagement rather than irrelevant
+  if (lower.trim().length > 15) {
+    return 'GENUINE_QUESTION';
   }
 
   return 'IRRELEVANT';
@@ -117,24 +127,33 @@ export function evaluateReplyRules(comment: OwnPostComment): { allowed: boolean;
 export function generateReplyText(comment: OwnPostComment): { replyText: string; correctionMarker: boolean; confidenceScore: number; qualityScore: number } {
   let replyText = '';
   let correctionMarker = false;
+  const lower = comment.commentText.toLowerCase();
 
   switch (comment.category) {
     case 'GENUINE_QUESTION':
     case 'REQUEST_CLARIFICATION':
-      replyText = `Data perspective: Our analysis is based on primary onchain feeds and verified announcements. Always monitor liquid orderbook depth and official filings.`;
+      if (lower.includes('invalidation') || lower.includes('risk') || lower.includes('stop')) {
+        replyText = `Data perspective: Key invalidation levels depend on volume profile & key liquidity pools. We track structural shifts via verified on-chain and orderbook feeds.`;
+      } else if (lower.includes('fed') || lower.includes('rate') || lower.includes('macro') || lower.includes('cpi')) {
+        replyText = `Macro context: Central bank policy shifts directly impact rate differentials & market liquidity. We monitor official Federal Reserve & SEC releases.`;
+      } else if (lower.includes('solana') || lower.includes('eth') || lower.includes('btc') || lower.includes('crypto')) {
+        replyText = `Onchain insight: Flow metrics & active address growth remain key indicators for market momentum. Source data is cross-verified across major feeds.`;
+      } else {
+        replyText = `Data perspective: Our analysis aggregates primary feeds and verified announcements to provide evidence-first market intelligence.`;
+      }
       break;
     case 'CONSTRUCTIVE_DISAGREEMENT':
       correctionMarker = true;
-      replyText = `[CORRECTION NOTICE]: Thank you for pointing this out. We have updated our internal records to reflect verified source data.`;
+      replyText = `[CORRECTION NOTICE]: Thank you for pointing this out. We value accurate data and have updated our verification models accordingly.`;
       break;
     case 'FINANCIAL_ADVICE_REQUEST':
       replyText = `Signal Atlas provides neutral market data analysis only. We do not provide personalized financial, trading, or tax advice.` + DISCLAIMERS.NFA;
       break;
     case 'RELEVANT_INFO':
-      replyText = `Thank you for contributing verified context to this topic.`;
+      replyText = `Great contribution. Adding verified community context helps build clearer market transparency for everyone.`;
       break;
     default:
-      replyText = `Thank you for your feedback on Signal Atlas analysis.`;
+      replyText = `Thank you for sharing your thoughts on this Signal Atlas market update.`;
   }
 
   return {
