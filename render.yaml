@@ -14,6 +14,12 @@ services:
         value: "false"
       - key: PUBLISH_INTERVAL_MINUTES
         value: "5"
+      - key: CRYPTO_DEFI_PERCENT
+        value: "50"
+      - key: AI_WEB3_PERCENT
+        value: "25"
+      - key: STOCKS_MACRO_PERCENT
+        value: "25"
       - key: MIN_CONFIDENCE_THRESHOLD
         value: "0.70"
       - key: AI_PROVIDER
@@ -22,9 +28,13 @@ services:
         sync: false
       - key: BLUESKY_APP_PASSWORD
         sync: false
+      - key: BLUESKY_SERVICE_URL
+        value: "https://bsky.social"
       - key: FARCASTER_NEYNAR_API_KEY
         sync: false
       - key: FARCASTER_SIGNER_UUID
+        sync: false
+      - key: FARCASTER_HANDLE
         sync: false
       - key: DISCORD_WEBHOOK_URL
         sync: false
@@ -32,10 +42,10 @@ services:
         sync: false
       - key: DISCORD_CHANNEL_ID
         sync: false
+      - key: DISCORD_CLIENT_ID
+        sync: false
       - key: DISCORD_HANDLE
         sync: false
       - key: DISCORD_INVITE_URL
-        sync: false
-      - key: FARCASTER_HANDLE
         sync: false
     healthCheckPath: /api/status
