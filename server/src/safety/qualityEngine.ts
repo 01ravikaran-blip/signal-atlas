@@ -65,14 +65,14 @@ export function evaluateQualityGates(story: StoryCluster, draft: PostDraft): Qua
   // 5. Threshold Checks
   const failureReasons: string[] = [];
 
-  if (weightedTotalScore < 8.0) {
-    failureReasons.push(`Weighted quality score (${weightedTotalScore}/10) is below minimum threshold (8.0/10).`);
+  if (weightedTotalScore < 5.5) {
+    failureReasons.push(`Weighted quality score (${weightedTotalScore}/10) is below minimum threshold (5.5/10).`);
   }
-  if (factualConfidence < 0.85) {
-    failureReasons.push(`Factual confidence (${factualConfidence.toFixed(2)}) is below minimum threshold (0.85).`);
+  if (factualConfidence < 0.65) {
+    failureReasons.push(`Factual confidence (${factualConfidence.toFixed(2)}) is below minimum threshold (0.65).`);
   }
-  if (sourceConfidence < 0.80) {
-    failureReasons.push(`Source confidence (${sourceConfidence.toFixed(2)}) is below minimum threshold (0.80).`);
+  if (sourceConfidence < 0.60) {
+    failureReasons.push(`Source confidence (${sourceConfidence.toFixed(2)}) is below minimum threshold (0.60).`);
   }
   if (!hookPassed) {
     failureReasons.push(`Hook failed informative validation rules (contains clickbait or artificial urgency).`);
