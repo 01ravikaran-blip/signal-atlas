@@ -1,0 +1,41 @@
+services:
+  - type: web
+    name: signal-atlas-247
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: starter
+    region: oregon
+    envVars:
+      - key: PORT
+        value: "5050"
+      - key: DEMO_MODE
+        value: "false"
+      - key: EMERGENCY_PAUSE
+        value: "false"
+      - key: PUBLISH_INTERVAL_MINUTES
+        value: "5"
+      - key: MIN_CONFIDENCE_THRESHOLD
+        value: "0.70"
+      - key: AI_PROVIDER
+        value: "local"
+      - key: BLUESKY_HANDLE
+        sync: false
+      - key: BLUESKY_APP_PASSWORD
+        sync: false
+      - key: FARCASTER_NEYNAR_API_KEY
+        sync: false
+      - key: FARCASTER_SIGNER_UUID
+        sync: false
+      - key: DISCORD_WEBHOOK_URL
+        sync: false
+      - key: DISCORD_TOKEN
+        sync: false
+      - key: DISCORD_CHANNEL_ID
+        sync: false
+      - key: DISCORD_HANDLE
+        sync: false
+      - key: DISCORD_INVITE_URL
+        sync: false
+      - key: FARCASTER_HANDLE
+        sync: false
+    healthCheckPath: /api/status
