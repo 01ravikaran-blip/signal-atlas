@@ -3,7 +3,7 @@ services:
     name: signal-atlas-247
     runtime: docker
     dockerfilePath: ./Dockerfile
-    plan: starter
+    plan: free
     region: oregon
     envVars:
       - key: PORT
