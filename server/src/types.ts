@@ -403,4 +403,37 @@ export interface MediaAnalyticsRecord {
   timestamp: string;
 }
 
+export interface WorkerHeartbeat {
+  id: string;
+  workerId: string;
+  status: 'ONLINE' | 'BUSY' | 'STALE' | 'OFFLINE';
+  lastHeartbeat: string;
+  lastSuccessfulIngestion?: string;
+  lastSuccessfulAiGeneration?: string;
+  lastSuccessfulPublication?: string;
+  nextScheduledRun?: string;
+  pendingJobsCount: number;
+  failedJobsCount: number;
+  lastError?: string;
+  mode: 'cloud' | 'local' | 'ollama' | 'demo';
+}
+
+export interface SchedulerJob {
+  jobId: string;
+  jobType: 'AUTONOMOUS_PUBLISH' | 'ENGAGEMENT_CYCLE' | 'CRON_RECONCILE';
+  scheduledTime: string;
+  startedTime?: string;
+  completedTime?: string;
+  status: 'PENDING' | 'RUNNING' | 'COMPLETED' | 'FAILED' | 'DEAD_LETTER' | 'PENDING_AI';
+  attemptNumber: number;
+  idempotencyKey: string;
+  lastError?: string;
+  nextRetry?: string;
+  publishedContentIds?: string[];
+  providerResponseIds?: string[];
+  lockedBy?: string;
+  lockedAt?: string;
+}
+
+
 

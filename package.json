@@ -6,7 +6,12 @@
   "description": "Signal Atlas - Autonomous Global Crypto, DeFi, AI, Web3, Stock-Market, and Macro News Publishing System",
   "scripts": {
     "install:all": "npm install && cd server && npm install && cd ../client && npm install",
+    "build": "cd client && npm run build && cd ../server && npm run build",
     "start": "node scripts/start.js",
+    "worker": "cd server && npm run worker",
+    "cron:run": "cd server && npm run cron:run",
+    "healthcheck": "cd server && npm run healthcheck",
+    "production:smoke-test": "cd server && npm run production:smoke-test",
     "dev:server": "cd server && npm run dev",
     "dev:client": "cd client && npm run dev",
     "test": "cd server && npm run test"

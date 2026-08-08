@@ -51,7 +51,7 @@ export const PlatformMatrix: React.FC<PlatformMatrixProps> = ({ status }) => {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
         {platforms.map(p => {
-          const info = status.platformStatus[p.key];
+          const info = (status.platformStatus && status.platformStatus[p.key]) || (status.permissions && status.permissions[p.key]);
           const isLive = info?.configured;
           const Icon = p.icon;
 

@@ -117,6 +117,12 @@ export interface SystemStatus {
     overrideReason?: string;
     updateCount: number;
   };
+  workerStatus?: {
+    online: boolean;
+    lastHeartbeat?: string;
+  };
+  platformStatus?: Record<PlatformTarget, { configured: boolean; mode: string }>;
+  permissions?: Record<PlatformTarget, { configured: boolean; mode: string; reason?: string }>;
 }
 
 export interface MediaScores {

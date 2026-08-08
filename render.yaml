@@ -1,13 +1,19 @@
 services:
+  # 1. Web Service: Dashboard, API & Readiness Endpoints
   - type: web
     name: signal-atlas-247
     runtime: docker
     dockerfilePath: ./Dockerfile
     plan: free
     region: oregon
+    healthCheckPath: /health/readiness
     envVars:
       - key: PORT
         value: "5050"
+      - key: NODE_ENV
+        value: "production"
+      - key: RENDER
+        value: "true"
       - key: DEMO_MODE
         value: "false"
       - key: EMERGENCY_PAUSE
@@ -23,7 +29,15 @@ services:
       - key: MIN_CONFIDENCE_THRESHOLD
         value: "0.70"
       - key: AI_PROVIDER
-        value: "local"
+        value: "cloud"
+      - key: CLOUD_LLM_API_KEY
+        sync: false
+      - key: CLOUD_LLM_BASE_URL
+        value: "https://api.openai.com/v1"
+      - key: CLOUD_LLM_MODEL
+        value: "gpt-4o-mini"
+      - key: DATABASE_URL
+        sync: false
       - key: BLUESKY_HANDLE
         sync: false
       - key: BLUESKY_APP_PASSWORD
@@ -42,10 +56,72 @@ services:
         sync: false
       - key: DISCORD_CHANNEL_ID
         sync: false
-      - key: DISCORD_CLIENT_ID
+      - key: TELEGRAM_BOT_TOKEN
         sync: false
-      - key: DISCORD_HANDLE
+      - key: TELEGRAM_CHAT_ID
         sync: false
-      - key: DISCORD_INVITE_URL
+
+  # 2. Persistent Unattended Background Worker
+  - type: worker
+    name: signal-atlas-worker
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerCommand: npm run worker
+    plan: starter
+    region: oregon
+    envVars:
+      - key: NODE_ENV
+        value: "production"
+      - key: RENDER
+        value: "true"
+      - key: DEMO_MODE
+        value: "false"
+      - key: EMERGENCY_PAUSE
+        value: "false"
+      - key: PUBLISH_INTERVAL_MINUTES
+        value: "5"
+      - key: AI_PROVIDER
+        value: "cloud"
+      - key: CLOUD_LLM_API_KEY
         sync: false
-    healthCheckPath: /api/status
+      - key: CLOUD_LLM_BASE_URL
+        value: "https://api.openai.com/v1"
+      - key: CLOUD_LLM_MODEL
+        value: "gpt-4o-mini"
+      - key: DATABASE_URL
+        sync: false
+      - key: BLUESKY_HANDLE
+        sync: false
+      - key: BLUESKY_APP_PASSWORD
+        sync: false
+      - key: FARCASTER_NEYNAR_API_KEY
+        sync: false
+      - key: FARCASTER_SIGNER_UUID
+        sync: false
+      - key: DISCORD_WEBHOOK_URL
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT_ID
+        sync: false
+
+  # 3. Scheduled Cron Trigger for Missed-Cycle Recovery & Reconciliation
+  - type: cron
+    name: signal-atlas-cron
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerCommand: npm run cron:run
+    schedule: "*/15 * * * *"
+    plan: free
+    region: oregon
+    envVars:
+      - key: NODE_ENV
+        value: "production"
+      - key: RENDER
+        value: "true"
+      - key: AI_PROVIDER
+        value: "cloud"
+      - key: CLOUD_LLM_API_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false

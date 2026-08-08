@@ -9,7 +9,7 @@ export function classifyComment(commentText: string): CommentCategory {
   const lower = commentText.toLowerCase();
 
   // 1. Scam, Phishing, Spam, Abuse Filters
-  if (lower.includes('airdrop') || lower.includes('claim free') || lower.includes('whatsapp') || lower.includes('telegram me') || lower.includes('dm me for investment') || lower.includes('doubled my btc')) {
+  if (lower.includes('airdrop') || lower.includes('claim free') || lower.includes('whatsapp') || lower.includes('telegram') || lower.includes('dm me') || lower.includes('doubled my btc') || lower.includes('guaranteed')) {
     return 'SCAM';
   }
   if (lower.includes('http://bit.ly') || lower.includes('.xyz/') || lower.includes('connect wallet') || lower.includes('claim-bonus')) {

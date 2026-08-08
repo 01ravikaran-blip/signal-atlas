@@ -17,6 +17,9 @@ router.get('/status', (req: Request, res: Response) => {
   const permissions = getPermissionStatusReport();
   const importantNewsState = db.getImportantNewsModeState();
 
+  const heartbeat = db.getLatestWorkerHeartbeat();
+  const workerOnline = heartbeat ? (Date.now() - new Date(heartbeat.lastHeartbeat).getTime()) < 15 * 60 * 1000 : false;
+
   const status = {
     emergencyPause: settings.emergencyPause,
     publishingPause: settings.publishingPause,
@@ -26,7 +29,7 @@ router.get('/status', (req: Request, res: Response) => {
     autonomousReposts: settings.autonomousReposts,
     perPlatformToggles: settings.perPlatformToggles,
     demoMode: settings.demoMode,
-    aiProvider: process.env.AI_PROVIDER || 'local',
+    aiProvider: process.env.AI_PROVIDER || 'cloud',
     publishIntervalMinutes: settings.publishIntervalMinutes,
     categoryDistribution: categoryStats,
     totalPublished: publications.length,
@@ -34,7 +37,11 @@ router.get('/status', (req: Request, res: Response) => {
     totalStories: stories.length,
     lastRunTimestamp: publications[0]?.publishedAt || blocked[0]?.timestamp || null,
     importantNewsMode: importantNewsState,
-    permissions
+    permissions,
+    workerStatus: {
+      online: workerOnline,
+      lastHeartbeat: heartbeat?.lastHeartbeat || undefined
+    }
   };
 
   res.json(status);

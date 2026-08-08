@@ -11,6 +11,7 @@ import { engagementEngine, getPermissionStatusReport, CAPABILITY_MATRIX } from '
 import { publishDraftToAllPlatforms } from '../src/publishers/simulationPublisher.ts';
 import { StoryCluster, PostDraft, OwnPostComment } from '../src/types.js';
 import { db } from '../src/db/database.ts';
+import { runProductionArchitectureTests } from './productionArchitecture.test.ts';
 
 async function runAll17Tests() {
   console.log('=================================================');
@@ -225,6 +226,15 @@ async function runAll17Tests() {
   console.log('\n=================================================');
   console.log(`RESULTS: ${passedTests}/${totalTests} TESTS PASSED`);
   console.log('=================================================\n');
+
+  // Run Production Architecture Test Suite
+  console.log('--- SECTION 8: Production Architecture & 24/7 Unattended Execution ---');
+  try {
+    await runProductionArchitectureTests();
+  } catch (archErr: any) {
+    console.error('Production architecture tests failed:', archErr.message);
+    process.exitCode = 1;
+  }
 
   if (passedTests === totalTests) {
     console.log('🎉 ALL 17 AMENDMENT TESTS PASSED SUCCESSFULLY!');

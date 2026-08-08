@@ -5,6 +5,7 @@ import path from 'path';
 import http from 'http';
 import { WebSocketServer } from 'ws';
 import { router } from './api/routes.ts';
+import { healthRouter } from './api/healthRoutes.ts';
 import { startAutonomousDaemon } from './scheduler/daemon.ts';
 import { db } from './db/database.ts';
 
@@ -20,14 +21,18 @@ const PORT = parseInt(process.env.PORT || '5050', 10);
 app.use(cors());
 app.use(express.json());
 
+// Health & Diagnostic endpoints
+app.use('/', healthRouter);
+
 // API endpoints
 app.use('/api', router);
+app.use('/api', healthRouter);
 
 // Serve static frontend build in production
 const clientDistPath = path.resolve(process.cwd(), '../client/dist');
 app.use(express.static(clientDistPath));
 app.get('*', (req, res, next) => {
-  if (req.path.startsWith('/api')) return next();
+  if (req.path.startsWith('/api') || req.path.startsWith('/health')) return next();
   res.sendFile(path.join(clientDistPath, 'index.html'), (err) => {
     if (err) res.status(404).send('Signal Atlas Server Running. Client build not found yet.');
   });

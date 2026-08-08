@@ -15,7 +15,9 @@ import {
   PlatformTarget,
   MediaAsset,
   MediaDerivative,
-  MediaAnalyticsRecord
+  MediaAnalyticsRecord,
+  WorkerHeartbeat,
+  SchedulerJob
 } from '../types.js';
 
 interface DatabaseSchema {
@@ -45,6 +47,8 @@ interface DatabaseSchema {
   mediaAssets: MediaAsset[];
   mediaDerivatives: MediaDerivative[];
   mediaAnalytics: MediaAnalyticsRecord[];
+  workerHeartbeats: WorkerHeartbeat[];
+  schedulerJobs: SchedulerJob[];
 }
 
 const DATA_DIR = path.resolve(process.cwd(), 'data');
@@ -96,7 +100,9 @@ class Database {
       publishedHashes: [],
       mediaAssets: [],
       mediaDerivatives: [],
-      mediaAnalytics: []
+      mediaAnalytics: [],
+      workerHeartbeats: [],
+      schedulerJobs: []
     };
     this.init();
   }
@@ -363,6 +369,49 @@ class Database {
 
   public getMediaAnalytics(limit = 100): MediaAnalyticsRecord[] {
     return (this.data.mediaAnalytics || []).slice(0, limit);
+  }
+
+  // Worker Heartbeats
+  public updateWorkerHeartbeat(heartbeat: WorkerHeartbeat) {
+    if (!this.data.workerHeartbeats) this.data.workerHeartbeats = [];
+    const index = this.data.workerHeartbeats.findIndex(h => h.workerId === heartbeat.workerId);
+    if (index >= 0) {
+      this.data.workerHeartbeats[index] = heartbeat;
+    } else {
+      this.data.workerHeartbeats.unshift(heartbeat);
+    }
+    if (this.data.workerHeartbeats.length > 50) this.data.workerHeartbeats.pop();
+    this.save();
+  }
+
+  public getLatestWorkerHeartbeat(): WorkerHeartbeat | null {
+    if (!this.data.workerHeartbeats || this.data.workerHeartbeats.length === 0) return null;
+    return this.data.workerHeartbeats[0];
+  }
+
+  // Scheduler Jobs
+  public saveSchedulerJob(job: SchedulerJob) {
+    if (!this.data.schedulerJobs) this.data.schedulerJobs = [];
+    const index = this.data.schedulerJobs.findIndex(j => j.jobId === job.jobId);
+    if (index >= 0) {
+      this.data.schedulerJobs[index] = job;
+    } else {
+      this.data.schedulerJobs.unshift(job);
+    }
+    if (this.data.schedulerJobs.length > 200) this.data.schedulerJobs.pop();
+    this.save();
+  }
+
+  public getSchedulerJob(jobId: string): SchedulerJob | undefined {
+    return (this.data.schedulerJobs || []).find(j => j.jobId === jobId);
+  }
+
+  public getPendingSchedulerJobs(): SchedulerJob[] {
+    return (this.data.schedulerJobs || []).filter(j => j.status === 'PENDING' || j.status === 'PENDING_AI');
+  }
+
+  public getSchedulerJobs(limit = 50): SchedulerJob[] {
+    return (this.data.schedulerJobs || []).slice(0, limit);
   }
 }
 
