@@ -23,7 +23,10 @@ export const OverviewCards: React.FC<OverviewCardsProps> = ({ status }) => {
   const aiPct = Math.round((aiCount / catTotal) * 100);
   const macroPct = Math.round((macroCount / catTotal) * 100);
 
-  const workerOnline = status.workerStatus?.online ?? true;
+  const workerOnline = Boolean(status.workerStatus?.online);
+  const lastHbTime = status.workerStatus?.lastHeartbeat
+    ? new Date(status.workerStatus.lastHeartbeat).toLocaleTimeString()
+    : 'No Heartbeat Yet';
   const workerMode = status.aiProvider || 'cloud';
 
   return (
@@ -34,12 +37,12 @@ export const OverviewCards: React.FC<OverviewCardsProps> = ({ status }) => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
           <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>RENDER WORKER</span>
           <div style={{ padding: '4px 8px', borderRadius: '6px', background: workerOnline ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)', color: workerOnline ? '#10B981' : '#EF4444', fontWeight: 800, fontSize: '0.75rem' }}>
-            {workerOnline ? '● 24/7 ONLINE' : '● OFFLINE'}
+            {workerOnline ? '● 24/7 ONLINE' : '● STALE / OFFLINE'}
           </div>
         </div>
         <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#FFF' }}>{workerMode.toUpperCase()} AI</div>
-        <p style={{ fontSize: '0.75rem', color: workerOnline ? '#10B981' : 'var(--text-muted)', marginTop: '6px' }}>
-          {workerOnline ? 'Unattended cloud publishing active' : 'Worker process heartbeat stale'}
+        <p style={{ fontSize: '0.75rem', color: workerOnline ? '#10B981' : '#F87171', marginTop: '6px' }}>
+          {workerOnline ? 'Unattended cloud publishing active' : `Last Heartbeat: ${lastHbTime}`}
         </p>
       </div>
       

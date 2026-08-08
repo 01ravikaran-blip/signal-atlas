@@ -120,6 +120,15 @@ export interface SystemStatus {
   workerStatus?: {
     online: boolean;
     lastHeartbeat?: string;
+    lastIngestion?: string;
+    lastAiGeneration?: string;
+    lastPublication?: string;
+    status?: string;
+  };
+  databaseInfo?: {
+    urlPresent: boolean;
+    type: string;
+    persistent: boolean;
   };
   platformStatus?: Record<PlatformTarget, { configured: boolean; mode: string }>;
   permissions?: Record<PlatformTarget, { configured: boolean; mode: string; reason?: string }>;

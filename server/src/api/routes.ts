@@ -19,6 +19,7 @@ router.get('/status', (req: Request, res: Response) => {
 
   const heartbeat = db.getLatestWorkerHeartbeat();
   const workerOnline = heartbeat ? (Date.now() - new Date(heartbeat.lastHeartbeat).getTime()) < 15 * 60 * 1000 : false;
+  const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
 
   const status = {
     emergencyPause: settings.emergencyPause,
@@ -29,7 +30,7 @@ router.get('/status', (req: Request, res: Response) => {
     autonomousReposts: settings.autonomousReposts,
     perPlatformToggles: settings.perPlatformToggles,
     demoMode: settings.demoMode,
-    aiProvider: process.env.AI_PROVIDER || 'cloud',
+    aiProvider: process.env.AI_PROVIDER || (isProduction ? 'cloud' : 'local'),
     publishIntervalMinutes: settings.publishIntervalMinutes,
     categoryDistribution: categoryStats,
     totalPublished: publications.length,
@@ -40,7 +41,16 @@ router.get('/status', (req: Request, res: Response) => {
     permissions,
     workerStatus: {
       online: workerOnline,
-      lastHeartbeat: heartbeat?.lastHeartbeat || undefined
+      lastHeartbeat: heartbeat?.lastHeartbeat || undefined,
+      lastIngestion: heartbeat?.lastSuccessfulIngestion || undefined,
+      lastAiGeneration: heartbeat?.lastSuccessfulAiGeneration || undefined,
+      lastPublication: heartbeat?.lastSuccessfulPublication || undefined,
+      status: heartbeat?.status || 'OFFLINE'
+    },
+    databaseInfo: {
+      urlPresent: Boolean(process.env.DATABASE_URL),
+      type: process.env.DATABASE_URL ? 'postgres' : 'sqlite_json',
+      persistent: Boolean(process.env.DATABASE_URL)
     }
   };
 
