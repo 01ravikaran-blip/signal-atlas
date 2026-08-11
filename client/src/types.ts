@@ -105,6 +105,26 @@ export interface SystemStatus {
   autonomousReposts?: boolean;
   demoMode: boolean;
   aiProvider: string;
+  aiModel?: string;
+  aiReachability?: string;
+  aiTokenUsage?: {
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
+    dailyPromptTokens: number;
+    dailyCompletionTokens: number;
+    dailyTotalTokens: number;
+    dailyRequestCount: number;
+    estimatedDailyCostUsd: number;
+  };
+  aiDetails?: {
+    provider: string;
+    model: string;
+    reachability: string;
+    lastLatencyMs?: number;
+    fallbackEventsCount?: number;
+    activeModelTier?: string;
+  };
   publishIntervalMinutes: number;
   categoryDistribution: Record<ContentCategory, number>;
   totalPublished: number;

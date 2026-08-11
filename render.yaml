@@ -28,14 +28,14 @@ services:
         value: "25"
       - key: MIN_CONFIDENCE_THRESHOLD
         value: "0.70"
+      - key: LLM_PROVIDER
+        value: "groq"
       - key: AI_PROVIDER
-        value: "cloud"
-      - key: CLOUD_LLM_API_KEY
+        value: "groq"
+      - key: LLM_MODEL
+        value: "llama-3.3-70b-versatile"
+      - key: GROQ_API_KEY
         sync: false
-      - key: CLOUD_LLM_BASE_URL
-        value: "https://api.openai.com/v1"
-      - key: CLOUD_LLM_MODEL
-        value: "gpt-4o-mini"
       - key: DATABASE_URL
         sync: false
       - key: BLUESKY_HANDLE
@@ -80,14 +80,14 @@ services:
         value: "false"
       - key: PUBLISH_INTERVAL_MINUTES
         value: "5"
+      - key: LLM_PROVIDER
+        value: "groq"
       - key: AI_PROVIDER
-        value: "cloud"
-      - key: CLOUD_LLM_API_KEY
+        value: "groq"
+      - key: LLM_MODEL
+        value: "llama-3.3-70b-versatile"
+      - key: GROQ_API_KEY
         sync: false
-      - key: CLOUD_LLM_BASE_URL
-        value: "https://api.openai.com/v1"
-      - key: CLOUD_LLM_MODEL
-        value: "gpt-4o-mini"
       - key: DATABASE_URL
         sync: false
       - key: BLUESKY_HANDLE
@@ -119,9 +119,13 @@ services:
         value: "production"
       - key: RENDER
         value: "true"
+      - key: LLM_PROVIDER
+        value: "groq"
       - key: AI_PROVIDER
-        value: "cloud"
-      - key: CLOUD_LLM_API_KEY
+        value: "groq"
+      - key: LLM_MODEL
+        value: "llama-3.3-70b-versatile"
+      - key: GROQ_API_KEY
         sync: false
       - key: DATABASE_URL
         sync: false

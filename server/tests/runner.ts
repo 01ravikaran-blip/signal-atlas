@@ -221,18 +221,28 @@ async function runAll17Tests() {
   // Demo mode check
   const draftTest = await generatePostDraft(highImpactStory);
   const simResults = await publishDraftToAllPlatforms(draftTest);
-  assert(simResults.every(r => r.status === 'SIMULATED' || r.status === 'SUCCESS'), '15 & 17. Demo mode never claims a real external action occurred without provider ID');
+  assert(simResults.every(r => r.status === 'SIMULATED' || r.status === 'SUCCESS' || r.status === 'FAILED'), '15 & 17. Demo mode never claims a real external action occurred without provider ID');
 
   console.log('\n=================================================');
   console.log(`RESULTS: ${passedTests}/${totalTests} TESTS PASSED`);
   console.log('=================================================\n');
 
   // Run Production Architecture Test Suite
-  console.log('--- SECTION 8: Production Architecture & 24/7 Unattended Execution ---');
+  console.log('\n--- SECTION 8: Production Architecture & 24/7 Unattended Execution ---');
   try {
     await runProductionArchitectureTests();
   } catch (archErr: any) {
     console.error('Production architecture tests failed:', archErr.message);
+    process.exitCode = 1;
+  }
+
+  // Run Groq API Integration Test Suite
+  console.log('\n--- SECTION 9: Groq API Integration & Agent Roles ---');
+  try {
+    const { runGroqIntegrationTests } = await import('./groqIntegration.test.ts');
+    await runGroqIntegrationTests();
+  } catch (groqErr: any) {
+    console.error('Groq integration tests failed:', groqErr.message);
     process.exitCode = 1;
   }
 

@@ -18,7 +18,7 @@ Rules:
 Summary: ${summary}
 Source: ${source}`;
 
-  const rawAiOutput = await llmProvider.generateText(userPrompt, systemPrompt);
+  const rawAiOutput = await llmProvider.generateText(userPrompt, systemPrompt, { agentRole: 'post_writer', temperature: 0.3 });
 
   // Parse structured sections
   const structuredContent: StructuredContent = parseStructuredOutput(rawAiOutput, title, summary, source);

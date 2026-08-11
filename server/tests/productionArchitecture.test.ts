@@ -28,9 +28,11 @@ export async function runProductionArchitectureTests() {
 
   // Test 2: AI Provider Selection & Ollama Rejection in Production
   const currentEnv = process.env.NODE_ENV;
+  const currentLlmProvider = process.env.LLM_PROVIDER;
   process.env.NODE_ENV = 'production';
   process.env.IS_PROD_TEST = 'true';
   process.env.AI_PROVIDER = 'ollama';
+  process.env.LLM_PROVIDER = 'ollama';
   process.env.OLLAMA_BASE_URL = 'http://127.0.0.1:11434';
 
   const aiStatus = await llmProvider.checkReachability();
@@ -48,7 +50,8 @@ export async function runProductionArchitectureTests() {
   // Reset Env
   process.env.NODE_ENV = currentEnv;
   delete process.env.IS_PROD_TEST;
-  process.env.AI_PROVIDER = 'auto';
+  process.env.AI_PROVIDER = 'groq';
+  process.env.LLM_PROVIDER = 'groq';
 
   // Test 3: Persistent Scheduler Locking & Idempotency
   const idempotencyKey = `test_key_${Date.now()}`;

@@ -27,20 +27,41 @@ export const OverviewCards: React.FC<OverviewCardsProps> = ({ status }) => {
   const lastHbTime = status.workerStatus?.lastHeartbeat
     ? new Date(status.workerStatus.lastHeartbeat).toLocaleTimeString()
     : 'No Heartbeat Yet';
-  const workerMode = status.aiProvider || 'cloud';
+  const workerMode = (status.aiProvider || 'groq').toUpperCase();
+  const activeModel = status.aiModel || status.aiDetails?.model || 'llama-3.3-70b-versatile';
+  const tokenStats = status.aiTokenUsage;
+  const estimatedCost = tokenStats ? `$${tokenStats.estimatedDailyCostUsd.toFixed(4)}` : '$0.0000';
+  const totalTokens = tokenStats ? tokenStats.dailyTotalTokens.toLocaleString() : '0';
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px' }}>
       
-      {/* 0. Unattended Background Worker Status */}
+      {/* 0. Groq LLM Intelligence Engine */}
       <div className="glass-card" style={{ padding: '20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-          <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>RENDER WORKER</span>
+          <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>LLM ENGINE</span>
+          <div style={{ padding: '4px 8px', borderRadius: '6px', background: 'rgba(0, 242, 254, 0.15)', color: '#00F2FE', fontWeight: 800, fontSize: '0.75rem' }}>
+            {workerMode} API
+          </div>
+        </div>
+        <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#FFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {activeModel}
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#34D399', marginTop: '6px' }}>
+          <span>Tokens: {totalTokens}</span>
+          <span>Cost: {estimatedCost}</span>
+        </div>
+      </div>
+
+      {/* 0.1 Unattended Background Worker Status */}
+      <div className="glass-card" style={{ padding: '20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+          <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>BACKGROUND WORKER</span>
           <div style={{ padding: '4px 8px', borderRadius: '6px', background: workerOnline ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)', color: workerOnline ? '#10B981' : '#EF4444', fontWeight: 800, fontSize: '0.75rem' }}>
             {workerOnline ? '● 24/7 ONLINE' : '● STALE / OFFLINE'}
           </div>
         </div>
-        <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#FFF' }}>{workerMode.toUpperCase()} AI</div>
+        <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#FFF' }}>AUTONOMOUS DAEMON</div>
         <p style={{ fontSize: '0.75rem', color: workerOnline ? '#10B981' : '#F87171', marginTop: '6px' }}>
           {workerOnline ? 'Unattended cloud publishing active' : `Last Heartbeat: ${lastHbTime}`}
         </p>

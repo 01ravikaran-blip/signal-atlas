@@ -85,6 +85,10 @@ healthRouter.get('/health/ai', async (req: Request, res: Response) => {
     reachability: aiStatus.reachability,
     fallbackEnabled: aiStatus.fallbackEnabled,
     lastLatencyMs: aiStatus.lastLatencyMs || null,
-    error: aiStatus.lastError ? aiStatus.lastError.replace(/bearer\s+[a-z0-9_-]+/gi, '[REDACTED]') : null
+    tokenUsage: aiStatus.tokenUsage || null,
+    fallbackEventsCount: aiStatus.fallbackEventsCount || 0,
+    activeModelTier: aiStatus.activeModelTier || 'primary',
+    modelsAvailable: aiStatus.modelsAvailable || null,
+    error: aiStatus.lastError ? aiStatus.lastError.replace(/bearer\s+[a-z0-9_-]+|gsk_[a-z0-9_-]+/gi, '[REDACTED]') : null
   });
 });

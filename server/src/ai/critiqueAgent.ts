@@ -15,7 +15,7 @@ Check:
 3. Is there any sensationalism or hype words (e.g., 'skyrocket', 'explode', 'guaranteed')?`;
 
   try {
-    const critiqueRes = await llmProvider.generateText(prompt);
+    const critiqueRes = await llmProvider.generateText(prompt, undefined, { agentRole: 'critic_editor', temperature: 0.1 });
     
     // Check for hype words in raw draft text
     const fullText = (draft.rawTopic + ' ' + draft.structuredContent.analysis).toLowerCase();

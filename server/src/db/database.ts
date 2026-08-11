@@ -376,10 +376,9 @@ class Database {
     if (!this.data.workerHeartbeats) this.data.workerHeartbeats = [];
     const index = this.data.workerHeartbeats.findIndex(h => h.workerId === heartbeat.workerId);
     if (index >= 0) {
-      this.data.workerHeartbeats[index] = heartbeat;
-    } else {
-      this.data.workerHeartbeats.unshift(heartbeat);
+      this.data.workerHeartbeats.splice(index, 1);
     }
+    this.data.workerHeartbeats.unshift(heartbeat);
     if (this.data.workerHeartbeats.length > 50) this.data.workerHeartbeats.pop();
     this.save();
   }

@@ -4,6 +4,7 @@ import { runAutonomousPublishingCycle } from '../scheduler/daemon.ts';
 import { PlatformTarget } from '../types.js';
 import { getPermissionStatusReport, engagementEngine, CAPABILITY_MATRIX } from '../services/engagementEngine.ts';
 import { ownPostMonitor } from '../services/ownPostMonitor.ts';
+import { llmProvider } from '../ai/llmProvider.ts';
 
 export const router = Router();
 
@@ -16,6 +17,7 @@ router.get('/status', (req: Request, res: Response) => {
   const categoryStats = db.getCategoryStats();
   const permissions = getPermissionStatusReport();
   const importantNewsState = db.getImportantNewsModeState();
+  const aiStatus = llmProvider.getStatus();
 
   const heartbeat = db.getLatestWorkerHeartbeat();
   const workerOnline = heartbeat ? (Date.now() - new Date(heartbeat.lastHeartbeat).getTime()) < 15 * 60 * 1000 : false;
@@ -30,7 +32,11 @@ router.get('/status', (req: Request, res: Response) => {
     autonomousReposts: settings.autonomousReposts,
     perPlatformToggles: settings.perPlatformToggles,
     demoMode: settings.demoMode,
-    aiProvider: process.env.AI_PROVIDER || (isProduction ? 'cloud' : 'local'),
+    aiProvider: process.env.LLM_PROVIDER || process.env.AI_PROVIDER || aiStatus.provider,
+    aiModel: aiStatus.model,
+    aiReachability: aiStatus.reachability,
+    aiTokenUsage: aiStatus.tokenUsage || null,
+    aiDetails: aiStatus,
     publishIntervalMinutes: settings.publishIntervalMinutes,
     categoryDistribution: categoryStats,
     totalPublished: publications.length,

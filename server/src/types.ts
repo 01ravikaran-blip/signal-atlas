@@ -415,7 +415,48 @@ export interface WorkerHeartbeat {
   pendingJobsCount: number;
   failedJobsCount: number;
   lastError?: string;
-  mode: 'cloud' | 'local' | 'ollama' | 'demo';
+  mode: 'groq' | 'cloud' | 'local' | 'ollama' | 'demo';
+}
+
+export type AgentRole = 
+  | 'news_collector'
+  | 'market_analyst'
+  | 'source_verifier'
+  | 'trend_scorer'
+  | 'post_writer'
+  | 'thread_writer'
+  | 'critic_editor'
+  | 'safety_checker'
+  | 'platform_formatter'
+  | 'publication_manager'
+  | 'analytics_summarizer';
+
+export interface TokenUsageStats {
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
+  dailyPromptTokens: number;
+  dailyCompletionTokens: number;
+  dailyTotalTokens: number;
+  dailyRequestCount: number;
+  estimatedDailyCostUsd: number;
+}
+
+export interface AiStatusReport {
+  provider: 'groq' | 'cloud' | 'ollama' | 'demo';
+  model: string;
+  reachability: 'reachable' | 'unreachable' | 'unknown';
+  fallbackEnabled: boolean;
+  lastError?: string;
+  lastLatencyMs?: number;
+  tokenUsage?: TokenUsageStats;
+  fallbackEventsCount?: number;
+  activeModelTier?: 'primary' | 'fallback' | 'speed_fallback' | 'offline';
+  modelsAvailable?: {
+    primary: string;
+    fallback: string;
+    speedFallback: string;
+  };
 }
 
 export interface SchedulerJob {
