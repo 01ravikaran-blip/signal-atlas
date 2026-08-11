@@ -105,27 +105,4 @@ services:
       - key: TELEGRAM_CHAT_ID
         sync: false
 
-  # 3. Scheduled Cron Trigger for Missed-Cycle Recovery & Reconciliation
-  - type: cron
-    name: signal-atlas-cron
-    runtime: docker
-    dockerfilePath: ./Dockerfile
-    dockerCommand: npm run cron:run
-    schedule: "*/15 * * * *"
-    plan: free
-    region: oregon
-    envVars:
-      - key: NODE_ENV
-        value: "production"
-      - key: RENDER
-        value: "true"
-      - key: LLM_PROVIDER
-        value: "groq"
-      - key: AI_PROVIDER
-        value: "groq"
-      - key: LLM_MODEL
-        value: "llama-3.3-70b-versatile"
-      - key: GROQ_API_KEY
-        sync: false
-      - key: DATABASE_URL
-        sync: false
+
