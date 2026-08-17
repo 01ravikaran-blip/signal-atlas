@@ -120,6 +120,16 @@ function parseStructuredOutput(raw: string, title: string, summary: string, sour
   };
 }
 
+function truncateSmart(text: string, maxLength: number): string {
+  if (text.length <= maxLength) return text;
+  const truncated = text.substring(0, maxLength - 3).trim();
+  const lastSpace = truncated.lastIndexOf(' ');
+  if (lastSpace > 0) {
+    return truncated.substring(0, lastSpace) + '...';
+  }
+  return truncated + '...';
+}
+
 function generatePlatformPayloads(
   title: string,
   content: StructuredContent,
@@ -128,10 +138,10 @@ function generatePlatformPayloads(
 ): Record<PlatformTarget, string> {
 
   // 1. Bluesky (<300 chars per post, mentions Discord & Farcaster)
-  const bskyText = `📊 SIGNAL ATLAS\n\n[FACT] ${title.substring(0, 85)}\n\n[ANALYSIS] ${content.analysis.substring(0, 75)}\n\n💬 Discord: ${SOCIAL_HANDLES.DISCORD_INVITE}\n💬 FC: ${SOCIAL_HANDLES.FARCASTER}`;
+  const bskyText = `📊 SIGNAL ATLAS\n\n[FACT] ${truncateSmart(title, 85)}\n\n[ANALYSIS] ${truncateSmart(content.analysis, 75)}\n\n💬 Discord: ${SOCIAL_HANDLES.DISCORD_INVITE}\n💬 FC: ${SOCIAL_HANDLES.FARCASTER}`;
 
   // 2. Farcaster (<320 bytes, mentions Discord & Bluesky)
-  const farcasterText = `🌐 Signal Atlas Update\n\n📌 ${title.substring(0, 110)}\n\n💡 ${content.analysis.substring(0, 75)}\n\n💬 Discord: ${SOCIAL_HANDLES.DISCORD_INVITE}\n💬 Bsky: ${SOCIAL_HANDLES.BLUESKY}`;
+  const farcasterText = `🌐 Signal Atlas Update\n\n📌 ${truncateSmart(title, 110)}\n\n💡 ${truncateSmart(content.analysis, 75)}\n\n💬 Discord: ${SOCIAL_HANDLES.DISCORD_INVITE}\n💬 Bsky: ${SOCIAL_HANDLES.BLUESKY}`;
 
   // 3. Telegram (HTML formatted, mentions Discord, Bluesky, Farcaster)
   const telegramText = `<b>SIGNAL ATLAS: GLOBAL MARKETS INSIGHT</b>\n\n<b>FACTS:</b>\n• ${content.facts.join('\n• ')}\n\n<b>ANALYSIS:</b>\n${content.analysis}\n\n<b>UNCERTAINTY:</b>\n• ${content.uncertainties.join('\n• ')}\n\n<b>FORECAST:</b>\n${content.forecasts}${content.disclaimerText || ''}\n\n<a href="${sourceUrl || 'https://signalatlas.org'}">🔗 Read Source Data</a>\n\n📱 <b>Connect:</b> <a href="${SOCIAL_HANDLES.DISCORD_INVITE}">Discord</a> | <b>Bsky:</b> ${SOCIAL_HANDLES.BLUESKY} | <b>FC:</b> ${SOCIAL_HANDLES.FARCASTER}`;
