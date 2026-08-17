@@ -101,7 +101,9 @@ async function startWorker() {
   }, intervalMs);
 }
 
+import { fileURLToPath } from 'url';
+
 // Run worker if called directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   startWorker().catch(err => console.error('Fatal worker error:', err));
 }

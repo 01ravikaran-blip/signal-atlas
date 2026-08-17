@@ -53,5 +53,9 @@ server.listen(PORT, () => {
   console.log(`=================================================`);
 
   // Start Autonomous Scheduler Daemon
-  startAutonomousDaemon();
+  if (process.env.DISABLE_WEB_DAEMON !== 'true') {
+    startAutonomousDaemon();
+  } else {
+    db.addLog('INFO', 'SERVER', 'Autonomous daemon disabled via DISABLE_WEB_DAEMON env var.');
+  }
 });

@@ -1,12 +1,16 @@
 services:
-  # 1. Web Service: Dashboard, API & Readiness Endpoints
+  # Web Service: Dashboard, API & Autonomous Daemon
   - type: web
     name: signal-atlas-247
     runtime: docker
     dockerfilePath: ./Dockerfile
-    plan: free
+    plan: starter
     region: oregon
     healthCheckPath: /health/readiness
+    disk:
+      name: data
+      mountPath: /app/server/data
+      sizeGB: 1
     envVars:
       - key: PORT
         value: "5050"
@@ -60,49 +64,3 @@ services:
         sync: false
       - key: TELEGRAM_CHAT_ID
         sync: false
-
-  # 2. Persistent Unattended Background Worker
-  - type: worker
-    name: signal-atlas-worker
-    runtime: docker
-    dockerfilePath: ./Dockerfile
-    dockerCommand: npm run worker
-    plan: starter
-    region: oregon
-    envVars:
-      - key: NODE_ENV
-        value: "production"
-      - key: RENDER
-        value: "true"
-      - key: DEMO_MODE
-        value: "false"
-      - key: EMERGENCY_PAUSE
-        value: "false"
-      - key: PUBLISH_INTERVAL_MINUTES
-        value: "5"
-      - key: LLM_PROVIDER
-        value: "groq"
-      - key: AI_PROVIDER
-        value: "groq"
-      - key: LLM_MODEL
-        value: "llama-3.3-70b-versatile"
-      - key: GROQ_API_KEY
-        sync: false
-      - key: DATABASE_URL
-        sync: false
-      - key: BLUESKY_HANDLE
-        sync: false
-      - key: BLUESKY_APP_PASSWORD
-        sync: false
-      - key: FARCASTER_NEYNAR_API_KEY
-        sync: false
-      - key: FARCASTER_SIGNER_UUID
-        sync: false
-      - key: DISCORD_WEBHOOK_URL
-        sync: false
-      - key: TELEGRAM_BOT_TOKEN
-        sync: false
-      - key: TELEGRAM_CHAT_ID
-        sync: false
-
-
